@@ -1,0 +1,33 @@
+const PDFDocument = require('pdfkit');
+function createPayslipPDF(payroll, res) {
+  const e = payroll.employee;
+  const doc = new PDFDocument({ size: 'A4', margin: 48 });
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader('Content-Disposition', `attachment; filename="payslip-${e.employeeId}-${payroll.period.replace(/[^a-z0-9]/gi, '-')}.pdf"`);
+  doc.pipe(res);
+  doc.fontSize(22).text('Employee Management System', { align: 'center' });
+  doc.moveDown(0.4).fontSize(11).fillColor('#64748B').text('Salary Payslip', { align: 'center' });
+  doc.moveDown();
+  doc.fillColor('#111827').fontSize(12).text(`Pay Period: ${payroll.period}`);
+  doc.moveDown(0.8);
+  doc.fontSize(10).text(`Employee: ${e.firstName} ${e.lastName}`);
+  doc.text(`Employee ID: ${e.employeeId}`);
+  doc.text(`Department: ${e.department?.name || '—'}`);
+  doc.text(`Position: ${e.position}`);
+  doc.moveDown();
+  doc.fontSize(13).text('Earnings');
+  doc.fontSize(11).text(`Basic Salary: $${payroll.basicSalary.toFixed(2)}`);
+  doc.text(`Allowances: $${payroll.allowances.toFixed(2)}`);
+  doc.text(`Bonus: $${payroll.bonus.toFixed(2)}`);
+  doc.text(`Gross Salary: $${(payroll.basicSalary + payroll.allowances + payroll.bonus).toFixed(2)}`);
+  doc.moveDown();
+  doc.fontSize(13).text('Deductions');
+  doc.fontSize(11).text(`Tax: $${payroll.tax.toFixed(2)}`);
+  doc.text(`PF: $${payroll.pf.toFixed(2)}`);
+  doc.text(`Other Deductions: $${payroll.otherDeductions.toFixed(2)}`);
+  doc.moveDown();
+  doc.fontSize(16).text(`Net Salary: $${payroll.netSalary.toFixed(2)}`);
+  doc.moveDown(2).fontSize(9).fillColor('#64748B').text(`Generated: ${new Date(payroll.generatedAt).toLocaleString()}`);
+  doc.end();
+}
+module.exports = createPayslipPDF;
