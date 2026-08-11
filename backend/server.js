@@ -7,4 +7,15 @@ app.get('/api/health',(req,res)=>res.json({success:true,message:'EMS API is runn
 app.use(express.static(path.join(__dirname,'..','frontend')));
 app.use((req,res,next)=>{if(req.path.startsWith('/api/'))return notFound(req,res);res.sendFile(path.join(__dirname,'..','frontend','index.html'));});
 app.use(errorHandler);
-connectDB().then(()=>app.listen(PORT,()=>console.log(`EMS running on http://localhost:${PORT}`))).catch(err=>{console.error('Startup failed:',err.message);process.exit(1);});
+connectDB().then(() => {
+    if (process.env.NODE_ENV !== 'production') {
+        app.listen(PORT, () => {
+            console.log(`EMS running on http://localhost:${PORT}`);
+        });
+    }
+}).catch(err => {
+    console.error('Startup failed:', err.message);
+});
+
+module.exports = app;
+
